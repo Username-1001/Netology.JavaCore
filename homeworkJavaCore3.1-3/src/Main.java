@@ -24,6 +24,7 @@ public class Main {
         }
 
         zipFiles("Games//savegames//saves.zip", savePaths);
+        deleteFiles(savePaths);
 
         File saveGames = new File("Games//savegames");
         Arrays.stream(saveGames.listFiles()).forEach(System.out::println);
@@ -173,24 +174,35 @@ public class Main {
     private static void zipFiles(String zipPath, List<String> savePaths) {
         try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath))) {
             for (String file : savePaths) {
-                File fileToDelete = new File(file);
+                File fileToZip = new File(file);
 
                 try (FileInputStream fis = new FileInputStream(file)) {
-                    ZipEntry entry = new ZipEntry(fileToDelete.getName());
+                    ZipEntry entry = new ZipEntry(fileToZip.getName());
                     zos.putNextEntry(entry);
                     byte[] buffer = new byte[fis.available()];
                     fis.read(buffer);
                     zos.write(buffer);
                     zos.closeEntry();
-
-                    fis.close();
-                    fileToDelete.delete();
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
                 }
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    private static void deleteFiles(List<String> savePaths) {
+        Log log = new Log();
+
+        for (String file : savePaths) {
+            File fileToDelete = new File(file);
+
+            if (fileToDelete.delete()) {
+                log.addMessageToLog("файл " + fileToDelete.getName() +  " успешно удален");
+            } else {
+                log.addMessageToLog("не удалось удалить файл " + fileToDelete.getName());
+            }
         }
     }
 }
